@@ -161,34 +161,44 @@ export default {
           .filter(Boolean)
       );
 
-      function updateRule(rule) {
-        if (typeof rule !== "string") {
-          return rule;
-        }
+           
+function updateRule(rule) {
+  if (typeof rule !== "string") {
+    return rule;
+  }
 
-        const lastComma = rule.lastIndexOf(",");
+  const parts = rule.split(",");
 
-        if (lastComma < 0) {
-          return rule;
-        }
+  if (parts.length < 2) {
+    return rule;
+  }
 
-        const prefix = rule.slice(0, lastComma + 1);
-        const target = rule.slice(lastComma + 1);
+  const ruleType = parts[0].trim().toUpperCase();
 
-        const match = target.match(/^(\s*)(.*?)(\s*)$/);
+  // MATCH / FINAL 规则只有一个策略组字段
+  // 其他常规规则的策略组字段位于第三列
+  let policyIndex;
 
-        if (!match) {
-          return rule;
-        }
+  if (["MATCH", "FINAL"].includes(ruleType)) {
+    policyIndex = 1;
+  } else {
+    policyIndex = 2;
+  }
 
-        const targetName = match[2];
+  if (policyIndex >= parts.length) {
+    return rule;
+  }
 
-        if (oldGroupNames.has(targetName)) {
-          return prefix + match[1] + masterName + match[3];
-        }
+  const oldPolicy = parts[policyIndex].trim();
 
-        return rule;
-      }
+  // 如果引用了旧策略组，则替换成新总策略组
+  if (oldGroupNames.has(oldPolicy)) {
+    parts[policyIndex] = masterName;
+  }
+
+  return parts.join(",");
+}
+
 
       if (Array.isArray(config.rules)) {
         config.rules = config.rules.map(updateRule);
