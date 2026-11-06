@@ -225,7 +225,7 @@ function updateRule(rule) {
       const responseHeaders = new Headers({
         "Content-Type": "text/yaml; charset=utf-8",
         "Content-Disposition":
-          'attachment; filename="飞鸟云.yaml"',
+          'attachment; filename="飞鸟云"',
         "Cache-Control": "no-store",
         "profile-update-interval":
           upstream.headers.get("profile-update-interval") || "24"
