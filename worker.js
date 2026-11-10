@@ -1,7 +1,7 @@
 import { parse, stringify } from "yaml";
 
 const UPSTREAM_API =
-  "https://cggac.908970.xyz/api/v1/client/subscribe";
+  "https://feiniaoyun.top/api/v1/client/subscribe";
 
 export default {
   async fetch(request, env) {
