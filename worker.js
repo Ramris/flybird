@@ -120,35 +120,73 @@ export default {
         groups.get(groupName).push(originalName);
       }
 
-      // =========================
-      // 7. 生成新策略组
-      // =========================
 
-      let masterName = "节点选择";
+// =========================
+// 7. 生成新策略组（少于5个节点合并到杂项）
+// =========================
 
-      while (groups.has(masterName)) {
-        masterName += "总";
-      }
+let masterName = "节点选择";
+const miscName = "杂项";
 
-      const groupNames = [...groups.keys()].sort();
+while (groups.has(masterName)) {
+  masterName += "总";
+}
 
-      const newGroups = [];
+const groupNames = [...groups.keys()].sort();
 
-      // 总策略组
-      newGroups.push({
-        name: masterName,
-        type: "select",
-        proxies: [...groupNames, "DIRECT"]
-      });
+const newGroups = [];
 
-      // 每个节点名称对应一个策略组
-      for (const groupName of groupNames) {
-        newGroups.push({
-          name: groupName,
-          type: "select",
-          proxies: groups.get(groupName)
-        });
-      }
+// 用于存放节点数量少于5个的节点
+const miscProxies = [];
+
+// 用于存放正常独立策略组
+const normalGroups = [];
+
+for (const groupName of groupNames) {
+  const nodes = groups.get(groupName);
+
+  if (nodes.length < 5) {
+    miscProxies.push(...nodes);
+  } else {
+    normalGroups.push(groupName);
+  }
+}
+
+// 总策略组
+const masterProxies = [
+  ...normalGroups
+];
+
+// 存在杂项节点时，添加杂项策略组
+if (miscProxies.length > 0) {
+  masterProxies.push(miscName);
+}
+
+masterProxies.push("DIRECT");
+
+newGroups.push({
+  name: masterName,
+  type: "select",
+  proxies: masterProxies
+});
+
+// 生成正常独立策略组
+for (const groupName of normalGroups) {
+  newGroups.push({
+    name: groupName,
+    type: "select",
+    proxies: groups.get(groupName)
+  });
+}
+
+// 生成杂项策略组
+if (miscProxies.length > 0) {
+  newGroups.push({
+    name: miscName,
+    type: "select",
+    proxies: miscProxies
+  });
+}
 
       // =========================
       // 8. 替换规则中的旧策略组引用
